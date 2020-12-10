@@ -12,13 +12,16 @@ using Microsoft.Identity.Web;
 
 namespace MyUX.Pages
 {
-    [Authorize]
+    [AuthorizeForScopes(Scopes = new string[] {
+                "api://795c6798-129c-4dc5-815a-e0d7727b9993/access_as_logged_in_user"})]
     public class IndexModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
         private readonly IHttpClientFactory httpClientFactory;
         private readonly ITokenAcquisition tokenAcquisition;
         private HttpClient HttpClient;
+
+        public string Result { get; set; }
 
         public IndexModel(ILogger<IndexModel> logger, 
             IHttpClientFactory httpClientFactory,
@@ -34,15 +37,15 @@ namespace MyUX.Pages
         public async Task OnGet()
         {
             var accessToken = await this.tokenAcquisition.GetAccessTokenForUserAsync(new string[] {
-                "access_as_logged_in_user"
+                "api://795c6798-129c-4dc5-815a-e0d7727b9993/access_as_logged_in_user"
             });
 
             this.HttpClient.DefaultRequestHeaders.Authorization = 
                 new AuthenticationHeaderValue("Bearer", accessToken);
 
-            var json = await this.HttpClient.GetAsync("https://localhost:5001/weatherforecast");
+            var json = await this.HttpClient.GetStringAsync("https://localhost:5001/weatherforecast");
 
-            Console.WriteLine(json);
+            Result = json;
         }
     }
 }
